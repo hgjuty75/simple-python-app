@@ -108,7 +108,7 @@ pipeline {
                 sh """
                     docker stop ${CONTAINER_NAME} || true
                     docker rm ${CONTAINER_NAME} || true
-                    docker run -d --name ${CONTAINER_NAME} -p 80:5000 \
+                    docker run -d --name ${CONTAINER_NAME} -p 8083:5000 \
                       -e STUDENT_NAME='${params.STUDENT_NAME}' \
                       ${DOCKER_IMAGE}
                 """
