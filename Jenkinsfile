@@ -53,12 +53,14 @@ pipeline {
         stage('Push to Registry') {
             steps {
                 echo 'Публикация образа в Docker Hub...'
-                script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'dockerhub-creds') {
-                        docker.image("${DOCKER_IMAGE}").push()
-                    }
-                }
-            }
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            sh """
+                echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                docker push ${DOCKER_IMAGE}
+                docker logout
+            """
+		}
+	    }
         }
 
         stage('Deploy to Dev') {
