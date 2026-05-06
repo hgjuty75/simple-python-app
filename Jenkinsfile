@@ -131,22 +131,31 @@ pipeline {
         }
     }
 
-    post {
+        post {
     success {
-        echo "Pipeline успешно завершён для среды ${params.ENVIRONMENT}"
-        telegramSend message: """
-            ✅ Сборка *${env.JOB_NAME}* #${env.BUILD_NUMBER} успешно выполнена.
-            Среда: ${params.ENVIRONMENT}
-            Docker образ: ${DOCKER_IMAGE}
-            Подробнее: ${env.BUILD_URL}
-        """
+        script {
+            // Отправка через Telegram API
+            withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'TG_TOKEN')]) {
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot${TG_TOKEN}/sendMessage \
+                        -d chat_id=1084321049 \
+                        -d parse_mode=HTML \
+                        -d text="✅ <b>Сборка ${env.JOB_NAME} #${env.BUILD_NUMBER} УСПЕШНО завершена.</b>%0AСреда: ${params.ENVIRONMENT}%0ADocker образ: ${DOCKER_IMAGE}%0A<a href='${env.BUILD_URL}'>Подробнее</a>"
+                """
+            }
+        }
     }
     failure {
-        telegramSend message: """
-            ❌ Сборка *${env.JOB_NAME}* #${env.BUILD_NUMBER} завершилась с ошибкой!
-            Среда: ${params.ENVIRONMENT}
-            Проверьте консоль: ${env.BUILD_URL}
-        """
+        script {
+            withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'TG_TOKEN')]) {
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot${TG_TOKEN}/sendMessage \
+                        -d chat_id=1084321049 \
+                        -d parse_mode=HTML \
+                        -d text="❌ <b>Сборка ${env.JOB_NAME} #${env.BUILD_NUMBER} ПРОВАЛИЛАСЬ.</b>%0AСреда: ${params.ENVIRONMENT}%0A<a href='${env.BUILD_URL}'>Смотреть логи</a>"
+                """
+            }
+        }
     }
 }
 }
