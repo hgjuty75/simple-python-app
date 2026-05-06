@@ -18,7 +18,7 @@ def hello():
             <h1 style="color: #4CAF50;">Hello from Jenkins CI/CD Pipeline!</h1>
             <p><strong>Student:</strong> {student_name}</p>
             <p><strong>Hostname:</strong> {socket.gethostname()}</p>
-            <p><strong>Version:</strong> 1.0.0</p>
+            <p><strong>Version:</strong> 1.0.1</p>
         </body>
     </html>
     """
