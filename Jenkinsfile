@@ -132,28 +132,21 @@ pipeline {
     }
 
     post {
-        success {
-            echo "Pipeline успешно завершён для среды ${params.ENVIRONMENT}"
-            emailext(
-                to: 'juicy.bebra84@gmail.com',                // ← замените на ваш email
-                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Сборка <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER} успешно выполнена.</p>
-                    <p>Среда: ${params.ENVIRONMENT}</p>
-                    <p>Docker образ: ${DOCKER_IMAGE}</p>
-                    <p>Подробнее: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                """
-            )
-        }
-        failure {
-            emailext(
-                to: 'juicy.bebra84@gmail.com',                // ← замените на ваш email
-                subject: "FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Сборка <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER} завершилась с ошибкой.</p>
-                    <p>Проверьте консольный вывод: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                """
-            )
-        }
+    success {
+        echo "Pipeline успешно завершён для среды ${params.ENVIRONMENT}"
+        telegramSend message: """
+            ✅ Сборка *${env.JOB_NAME}* #${env.BUILD_NUMBER} успешно выполнена.
+            Среда: ${params.ENVIRONMENT}
+            Docker образ: ${DOCKER_IMAGE}
+            Подробнее: ${env.BUILD_URL}
+        """
     }
+    failure {
+        telegramSend message: """
+            ❌ Сборка *${env.JOB_NAME}* #${env.BUILD_NUMBER} завершилась с ошибкой!
+            Среда: ${params.ENVIRONMENT}
+            Проверьте консоль: ${env.BUILD_URL}
+        """
+    }
+}
 }
